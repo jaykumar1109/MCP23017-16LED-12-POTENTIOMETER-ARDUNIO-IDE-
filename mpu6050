@@ -1,0 +1,70 @@
+#include <Wire.h>
+
+// Define the I2C addresses based on AD0 pin connection
+#define MPU6050_ADDR_AD0_LOW  0x68  // AD0 connected to GND
+#define MPU6050_ADDR_AD0_HIGH 0x69  // AD0 connected to 5V
+
+void setup() {
+  Serial.begin(9600);
+  Wire.begin(); // Initialize I2C on Mega2560 (SDA=20, SCL=21)
+
+  // Initialize both sensors
+  initMPU6050(MPU6050_ADDR_AD0_LOW);
+  initMPU6050(MPU6050_ADDR_AD0_HIGH);
+  
+  Serial.println("Setup complete. Reading data...");
+}
+
+void loop() {
+  // Read and display data from Sensor 1 (AD0 Low -> GND)
+  Serial.println("--- Sensor 1 (AD0 Low, Addr 0x68) ---");
+  readMPU6050(MPU6050_ADDR_AD0_LOW);
+  
+  delay(500); // Small delay between readings
+  
+  // Read and display data from Sensor 2 (AD0 High -> 5V)
+  Serial.println("--- Sensor 2 (AD0 High, Addr 0x69) ---");
+  readMPU6050(MPU6050_ADDR_AD0_HIGH);
+  
+  delay(1000); // Wait 1 second before next loop
+}
+
+// Function to initialize a specific MPU6050
+void initMPU6050(int address) {
+  Wire.beginTransmission(address);
+  Wire.write(0x6B); // Power management register
+  Wire.write(0);    // Wake up sensor
+  Wire.endTransmission(true);
+  delay(100);
+}
+
+// Function to read data from a specific MPU6050
+void readMPU6050(int address) {
+  Wire.beginTransmission(address);
+  Wire.write(0x3B); // Starting register for ACCEL_XOUT_H
+  Wire.endTransmission(false);
+  
+  Wire.requestFrom(address, 14, true); // Request 14 bytes of data
+  
+  // Read the 6-axis data (Accel + Gyro)
+  int16_t accX = Wire.read() << 8 | Wire.read();
+  int16_t accY = Wire.read() << 8 | Wire.read();
+  int16_t accZ = Wire.read() << 8 | Wire.read();
+  int16_t temp = Wire.read() << 8 | Wire.read();
+  int16_t gyroX = Wire.read() << 8 | Wire.read();
+  int16_t gyroY = Wire.read() << 8 | Wire.read();
+  int16_t gyroZ = Wire.read() << 8 | Wire.read();
+  
+  // Print results to Serial Monitor
+  Serial.print("Accel (X,Y,Z): ");
+  Serial.print(accX); Serial.print(", ");
+  Serial.print(accY); Serial.print(", ");
+  Serial.println(accZ);
+  
+  Serial.print("Gyro (X,Y,Z): ");
+  Serial.print(gyroX); Serial.print(", ");
+  Serial.print(gyroY); Serial.print(", ");
+  Serial.println(gyroZ);
+  
+  Serial.println();
+}
