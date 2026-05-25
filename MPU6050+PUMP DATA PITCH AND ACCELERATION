@@ -1,0 +1,37 @@
+// Define the analog pins for 12 water level sensors
+const int sensorPins[] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11};
+const int numSensors = 12;
+
+// Optional: Give names to each sensor location
+const char* sensorNames[] = {
+  "Tank 1", "Tank 2", "Tank 3", "Tank 4",
+  "Tank 5", "Tank 6", "Tank 7", "Tank 8",
+  "Tank 9", "Tank 10", "Tank 11", "Tank 12"
+};
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("=== 12 Channel Water Level Sensor Monitor ===");
+  Serial.println("Sensor: Raw Value | Percentage");
+  Serial.println("==========================================\n");
+}
+
+void loop() {
+  // Read all 12 sensors
+  for(int i = 0; i < numSensors; i++) {
+    int rawValue = analogRead(sensorPins[i]);
+    int percentage = map(rawValue, 0, 1023, 0, 100);
+    
+    Serial.print(sensorNames[i]);
+    Serial.print(" (A");
+    Serial.print(i);
+    Serial.print("): ");
+    Serial.print(rawValue);
+    Serial.print(" | ");
+    Serial.print(percentage);
+    Serial.println("%");
+  }
+  
+  Serial.println("\n----------------------------------------\n");
+  delay(1000); // Update every second
+}
